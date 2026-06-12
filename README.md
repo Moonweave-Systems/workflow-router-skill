@@ -43,12 +43,17 @@ Use $workflow-router to decide the right workflow and carry this task through ve
 Use $workflow-router to design the agent workflow before making changes.
 ```
 
+The skill activates through explicit `$workflow-router` use or model selection
+for broad, ambiguous, or multi-step work. It is not a background policy or
+daemon.
+
 ## Repository Layout
 
 ```text
 .
 ├── SKILL.md                  # Agent-facing routing contract
 ├── agents/openai.yaml        # UI metadata for skill listings
+├── docs/spec.md              # Product and release contract
 ├── references/router-map.md  # Detailed routing table
 ├── LICENSE                   # MIT license
 └── README.md                 # Public repo overview
@@ -59,7 +64,7 @@ Use $workflow-router to design the agent workflow before making changes.
 Validate the skill package:
 
 ```bash
-python /Users/choemun-yeong/.codex/skills/.system/skill-creator/scripts/quick_validate.py .
+uv run python "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" .
 ```
 
 ## License

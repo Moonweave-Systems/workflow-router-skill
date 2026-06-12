@@ -3,18 +3,22 @@
 Use this map after reading `SKILL.md` when the request is broad, ambiguous, or
 could trigger more than one workflow.
 
-## Intent Classifier
+## Canonical Routes
 
-| User intent | Primary route | Evidence required |
+Keep these route names synchronized with `docs/spec.md`. Use exactly one as the
+primary route, then add secondary context such as "with GitHub context" only
+after the primary route is selected.
+
+| Route | Triggers | Evidence |
 | --- | --- | --- |
-| "Build", "fix", "implement", "add" | Implementation workflow | Focused tests, lint/build when relevant, changed files |
-| "Debug", "why failing", "diagnose" | Reproduce-minimize-fix workflow | Repro command, failing signal, passing regression check |
-| "Review", "audit", "find issues" | Findings-first review | File/line findings, severity ordering, test gaps |
-| "PR", "issue", "CI", "GitHub" | GitHub workflow | Repo/branch/PR identity, check or comment evidence |
-| "Research", "market", "latest", "best practice" | Research workflow | Current source URLs, credibility notes |
-| "Workflow", "agent", "skill", "router" | Workflow-design workflow | Local skill/repo state, selected design, validation path |
-| "Mac slow", "storage", "config", "server" | System triage workflow | Live process/config/storage samples |
-| "DOCX", "PPTX", "spreadsheet", "PDF" | Artifact workflow | Rendered/artifact-level verification |
+| Implementation | build, implement, add, refactor, small requested code/doc change | changed paths plus focused tests, build output, or direct command behavior |
+| Debugging | debug, diagnose, why failing, broken, "Fix this failing test", "CI failed and fix it" | reproduction signal plus passing regression check |
+| Review | review, audit, find issues, inspect diff | findings first with file and line references |
+| GitHub | PR, issue, review comments, checks, branch metadata, GitHub summary | repo/branch/PR identity plus structured context |
+| Research | market, latest, best practice, compare current options | current source URLs and credibility notes |
+| Workflow design | workflow, agent, skill, router, loop, plan the process | selected design plus validation path |
+| System triage | Mac slow, storage, config, server, service state | live process, disk, config, or service samples |
+| Artifact | DOCX, PDF, PPTX, spreadsheet, UI visual output, prove it visually | rendered or artifact-level proof |
 
 ## Specialized Role Selection
 
@@ -66,3 +70,24 @@ standard.
 2. Prefer official docs, maintained repos, and recent primary sources.
 3. Separate market signal from recommendation.
 4. End with a decision or a narrow next experiment.
+
+### GitHub
+
+1. Resolve repo, branch, PR, issue, or check identity.
+2. Inspect current GitHub context before summarizing or changing anything.
+3. Route failures needing a fix into Debugging with GitHub context.
+4. Report the structured context and any local verification.
+
+### System Triage
+
+1. Sample live process, disk, memory, config, or service state first.
+2. Identify the strongest current signal and separate stale residue from active work.
+3. Recommend only reversible local actions unless the user approves risk.
+4. Report commands sampled and the concrete culprit or remaining uncertainty.
+
+### Artifact
+
+1. Identify the consumer-visible artifact layer to inspect.
+2. Render, parse, screenshot, or inspect artifact cells/XML/pixels as appropriate.
+3. Compare the observed artifact behavior to the requested change.
+4. Report artifact-level evidence and any unverified gaps.

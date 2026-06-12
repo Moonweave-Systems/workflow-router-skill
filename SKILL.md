@@ -1,6 +1,6 @@
 ---
 name: workflow-router
-description: Route ambiguous or multi-step agent work into the right workflow before execution. Use when the user asks Codex to choose how to proceed, design or run workflows, coordinate specialized agents, handle broad repo/system tasks, or continue through implementation, review, debugging, GitHub, research, or verification without stopping at a proposal.
+description: Use when a request is broad, ambiguous, or spans multiple workflows (implementation, debugging, review, GitHub, research, system triage, artifacts) and the right workflow must be chosen before execution.
 ---
 
 # Workflow Router
@@ -11,6 +11,16 @@ and close with concrete verification evidence.
 
 Do not turn this into a general autonomous loop engine. Keep the loop bounded,
 reversible, and tied to the user's current goal.
+
+## Activation Contract
+
+This skill activates when the user names `$workflow-router`, asks for workflow
+routing, or the description matches broad, ambiguous, or multi-workflow work. It
+does not run as a background policy, daemon, or global override.
+
+Once active, use `SKILL.md` plus `references/router-map.md` as the runtime
+contract. If the request is clearly a one-step task, keep routing lightweight:
+classify it, act directly, and verify without extra ceremony.
 
 ## Start Here
 
@@ -30,6 +40,7 @@ the decision and do not create files or run write actions.
 ## Routing Rules
 
 Prefer a single specialized path over several overlapping ones.
+If two routes seem plausible, choose the route that provides the earliest verifiable evidence; a failing CI request is a debugging route with GitHub context.
 
 - Implementation: read relevant files, make a minimal diff, run focused tests,
   then summarize changed files and verification.
@@ -41,6 +52,9 @@ Prefer a single specialized path over several overlapping ones.
   then use GitHub-specific workflows or `gh` for gaps.
 - Research or docs: prefer official/current sources and cite URLs. For local
   repo decisions, local architecture beats generic web guidance.
+- Workflow design: decide whether the right artifact is a skill, plugin, MCP,
+  script, repo doc, issue plan, or direct implementation path, then validate the
+  decision with a real prompt, command, or documented evaluation path.
 - System or machine triage: sample live state before explaining causes. Do not
   rely on stale summaries for process, storage, config, or runtime claims.
 - Artifact work: prove the artifact changed in the consumer-visible layer,
@@ -50,9 +64,13 @@ Prefer a single specialized path over several overlapping ones.
 
 Use bounded repair loops:
 
-- Retry the current approach at most twice when the failure is clearly
-  transient or mechanical.
-- If the same error appears three times, change strategy instead of repeating.
+- A repair attempt is one action/check cycle: a command, patch, tool call,
+  browser check, or external call followed by its observed result.
+- The first failed action counts as attempt 1.
+- Retry the same approach at most two additional times when the failure is
+  clearly transient or mechanical.
+- If the same error appears across three attempts, change strategy instead of
+  repeating.
 - Stop after five total repair attempts in one workflow unless a new signal
   materially narrows the problem.
 - Preserve the strongest evidence gathered before reporting a blocker.
@@ -75,6 +93,10 @@ Pause for explicit confirmation before destructive or externally visible work:
 - database migrations
 - production deploys
 - payments, subscriptions, secret access, or external messages
+- public API changes when not clearly requested
+
+Secrets must never be committed. Before pushing a new or changed public repo, run a
+lightweight secret pattern scan or stronger available scanner.
 
 Never fabricate data to satisfy validation. If evidence is missing, say what is
 missing and what was verified instead.

@@ -1,5 +1,7 @@
 # Workflow Router Skill Spec
 
+Status: Active, Last updated: 2026-06-12
+
 ## Purpose
 
 `workflow-router` is a thin agent-facing routing skill. It helps Codex choose
@@ -20,6 +22,21 @@ small enough to load quickly and specific enough to shape behavior.
 The repo is the single source of truth for the skill. Installed copies should
 come from this repo by symlink or copy-style install, with `SKILL.md` and
 `references/router-map.md` treated as the runtime contract.
+
+## Activation Contract
+
+The skill activates through explicit user invocation (`$workflow-router`, the
+skill name, or a direct request to route workflow) or model selection from the
+frontmatter description for broad, ambiguous, or multi-step work. Activation is
+not ambient: the router is not a daemon, background policy, hidden hook, or
+global override.
+
+After activation, `SKILL.md` and `references/router-map.md` define runtime
+behavior. This spec defines the product contract and release criteria, so any
+route, fixture, activation, loop, or verification change must keep those
+runtime files synchronized with this document.
+
+The frontmatter description must state trigger conditions only; never summarize runtime behavior.
 
 ## Non-Goals
 
@@ -77,10 +94,12 @@ when blocked.
 ## Routing Contract
 
 The router must map each request to one primary route.
+The route names below are canonical and must match
+`references/router-map.md`.
 
 | Route | Trigger examples | Required evidence |
 | --- | --- | --- |
-| Implementation | build, fix, add, update, refactor | changed paths plus focused tests or build output |
+| Implementation | build, add, update, refactor | changed paths plus focused tests or build output |
 | Debugging | debug, diagnose, why failing, broken | reproduction signal plus passing regression check |
 | Review | review, audit, find issues | findings first with file and line references |
 | GitHub | PR, issue, comments, CI, checks | repo/branch/PR identity plus structured context |
@@ -138,10 +157,14 @@ run a lightweight secret pattern scan or a stronger available scanner.
 
 The router should enforce these stop rules:
 
-- Retry the same approach at most twice for mechanical or transient failures.
-- After the same error appears three times, change strategy.
-- Stop after five total repair attempts unless a new signal materially narrows
-  the issue.
+- A repair attempt is one action/check cycle: a command, patch, tool call,
+  browser check, or external call followed by its observed result.
+- The first failed action counts as attempt 1.
+- Retry the same approach at most two additional times for mechanical or
+  transient failures.
+- After the same error appears across three attempts, change strategy.
+- Stop after five total repair attempts in one workflow unless a new signal
+  materially narrows the issue.
 - Do not convert a blocked verification step into a success claim.
 
 Each iteration must improve one of:
@@ -191,16 +214,23 @@ real use. The current value is judgment and routing, not automation code.
 Future changes should be tested against fixture prompts before release. The
 minimum fixture set should cover:
 
-1. "Fix this failing test in the current repo."
-2. "Review this PR for regressions."
-3. "Research the current best practice for this API."
-4. "My Mac feels slow, find the culprit."
-5. "Design the workflow before implementing this skill."
-6. "The UI change is done, prove it visually."
-7. "CI failed on this branch, debug it."
-8. "This DOCX output changed, verify the real document."
+| Fixture prompt | Expected primary route | Evidence focus |
+| --- | --- | --- |
+| "Add the requested CLI flag in this repo." | Implementation | changed paths plus focused test or command behavior |
+| "Fix this failing test in the current repo." | Debugging | failing signal before fix plus passing regression check |
+| "Review this PR for regressions." | Review | findings first with file and line references |
+| "Summarize the open PR comments and checks." | GitHub | repo/branch/PR identity plus comment or check evidence |
+| "Research the current best practice for this API." | Research | current source URLs and credibility notes |
+| "My Mac feels slow, find the culprit." | System triage | live process, memory, disk, or service samples |
+| "Design the workflow before implementing this skill." | Workflow design | selected design plus validation path |
+| "The UI change is done, prove it visually." | Artifact | browser, screenshot, or rendered-pixel evidence |
+| "This DOCX output changed, verify the real document." | Artifact | parsed DOCX XML/text or rendered document evidence |
+| "CI failed on this branch, debug it." | Debugging | CI identity plus reproduction or passing rerun evidence |
+| "Rename this variable in one file." | Implementation | lightweight direct action plus verification, no router ceremony |
+| "What does this function do?" | No route | direct answer, no write actions, no routing ceremony |
 
-For each fixture, record:
+For each fixture, record the expected primary route from the fixture table above
+and:
 
 - selected route
 - whether local context was inspected when needed
@@ -213,12 +243,37 @@ For each fixture, record:
 A release is acceptable when:
 
 - `quick_validate.py` passes on the skill folder.
-- `SKILL.md` has no placeholders and remains concise.
+- `SKILL.md` has no placeholders.
+- `SKILL.md` stays at or under 800 words.
 - `references/router-map.md` contains the current route table.
 - fixture review finds no systematic over-routing, over-execution, or missing
   verification pattern.
 - public repo scan finds no committed secrets.
 - install path resolves to the intended source.
+
+### Reproducible Release Check
+
+Run these checks from the repository root before release and keep the output in
+release notes or the PR body:
+
+```bash
+uv run python "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.py" .
+```
+
+```bash
+git diff --check
+```
+
+```bash
+! git ls-files -z | xargs -0 rg -n --pcre2 "(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"]{8,}|-----BEGIN (RSA|OPENSSH) PRIVATE KEY-----" --glob '!LICENSE'
+```
+
+```bash
+installed="$HOME/.codex/skills/workflow-router"; test -e "$installed" && test "$(cd "$installed" && pwd -P)" = "$(pwd -P)"
+```
+
+Review the fixture table above and record, for each row, the selected route,
+evidence requested or produced, and whether the final answer overclaimed.
 
 ## Open Questions
 
