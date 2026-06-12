@@ -28,7 +28,10 @@ Real requests are rarely one operation. "CI failed on this branch, fix it" mixes
 | System triage | Mac slow, storage, config, server | live process, disk, or config samples |
 | Artifact | DOCX, PDF, PPTX, spreadsheet, visuals | rendered or artifact-level proof |
 
-Pure questions and trivial one-step tasks bypass routing entirely. The authoritative trigger list and per-route default workflows live in [`references/router-map.md`](references/router-map.md).
+Pure questions and trivial one-step tasks bypass routing entirely, and
+multi-stage requests traverse routes in sequence. The authoritative trigger
+list and per-route default workflows live in
+[`references/router-map.md`](references/router-map.md).
 
 ## Guardrails
 

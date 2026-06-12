@@ -16,11 +16,12 @@ reversible, and tied to the user's current goal.
 
 This skill activates when the user names `$workflow-router`, asks for workflow
 routing, or the description matches broad, ambiguous, or multi-step work. It
-does not run as a background policy, daemon, or global override.
+is not a background policy, daemon, or global override.
 
 Once active, use `SKILL.md` plus `references/router-map.md` as the runtime
 contract. If the request is clearly a one-step task, keep routing lightweight:
-classify it, act directly, and verify without extra ceremony.
+classify it, act directly, and verify without extra ceremony. When another
+loaded skill imposes stricter limits, the stricter rule wins.
 
 ## Start Here
 
@@ -53,7 +54,7 @@ If two routes seem plausible, choose the route that provides the earliest verifi
 - Research: prefer official/current sources and cite URLs. For local
   repo decisions, local architecture beats generic web guidance.
 - Workflow design: decide whether the right artifact is a skill, plugin, MCP,
-  script, repo doc, issue plan, or direct implementation path, then validate the
+  script, repo doc, or direct implementation path, then validate the
   decision with a real prompt, command, or documented evaluation path.
 - System triage: sample live state before explaining causes. Do not
   rely on stale summaries for process, storage, config, or runtime claims.
@@ -96,7 +97,7 @@ Pause for explicit confirmation before destructive or externally visible work:
 - public API changes when not clearly requested
 
 Secrets must never be committed. Before pushing a new or changed public repo, run a
-lightweight secret pattern scan or stronger available scanner.
+lightweight secret pattern scan or a stronger available scanner.
 
 Never fabricate data to satisfy validation. If evidence is missing, say what is
 missing and what was verified instead.
@@ -110,6 +111,6 @@ Before claiming completion:
 3. Separate passing evidence from blocked or skipped checks.
 4. Give the user the result, changed paths, and any remaining risk.
 
-For frontend or visual work, include browser or screenshot verification when a
-local target exists. For command-line or workflow work, include the actual
-command behavior. For research, cite the sources used.
+Include browser or screenshot verification for visual work with a local
+target, actual command behavior for command-line work, and cited sources for
+research.

@@ -29,7 +29,8 @@ The skill activates through explicit user invocation (`$workflow-router`, the
 skill name, or a direct request to route workflow) or model selection from the
 frontmatter description for broad, ambiguous, or multi-step work. Activation is
 not ambient: the router is not a daemon, background policy, hidden hook, or
-global override.
+global override. When another loaded skill or policy imposes stricter limits on
+the same action, the stricter rule wins.
 
 After activation, `SKILL.md` and `references/router-map.md` define runtime
 behavior. This spec defines the product contract and release criteria, so any
@@ -113,6 +114,10 @@ authoritative trigger list lives in `references/router-map.md`.
 If two routes seem plausible, choose the route that provides the earliest
 verifiable evidence. Example: a failing CI request is a debugging route with
 GitHub context, not a general GitHub summary.
+
+A multi-stage request traverses routes in sequence: classify the primary route
+for the current stage and reclassify at stage boundaries. Rerouting happens
+only at real stage boundaries, never to reset the repair cap.
 
 ## Specialized Skills And Roles
 
@@ -230,6 +235,9 @@ minimum fixture set should cover:
 | "CI failed on this branch, debug it." | Debugging | CI identity plus reproduction or passing rerun evidence |
 | "Rename this variable in one file." | Implementation | lightweight direct action plus verification, no router ceremony |
 | "What does this function do?" | No route | direct answer, no write actions, no routing ceremony |
+| "Force-push this cleanup to main." | Implementation (gated) | explicit confirmation requested before any force push; no execution without approval |
+| "Add a trigger word to this skill's description." | Implementation | changed description plus validator pass, not routed to Workflow design |
+| "CI is failing here; once green, summarize the open review comments." | Debugging then GitHub | staged routing: repro plus passing rerun first, then current comment and check data |
 
 For each fixture, record the expected primary route from the fixture table above
 and:
@@ -247,6 +255,7 @@ A release is acceptable when:
 - `quick_validate.py` passes on the skill folder.
 - `SKILL.md` has no placeholders.
 - `SKILL.md` stays at or under 800 words.
+- committed content passes the whitespace check.
 - `references/router-map.md` contains the current route table.
 - fixture review finds no systematic over-routing, over-execution, or missing
   verification pattern.
@@ -267,11 +276,15 @@ git diff --check "$(git hash-object -t tree /dev/null)" HEAD
 ```
 
 ```bash
-git ls-files -z ':(exclude)LICENSE' | xargs -0 rg -n --pcre2 "(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"]{8,}|-----BEGIN (RSA|OPENSSH) PRIVATE KEY-----"; test $? -eq 1
+rg -n --pcre2 "(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"]{8,}|-----BEGIN (RSA|OPENSSH) PRIVATE KEY-----" --glob '!LICENSE' .; test $? -eq 1
 ```
 
 ```bash
 test "$(wc -w < SKILL.md)" -le 800
+```
+
+```bash
+rg -n "T[O]DO|T[B]D|PLACE[H]OLDER|FIX[M]E" --glob '*.md' .; test $? -eq 1
 ```
 
 ```bash
@@ -282,6 +295,7 @@ else diff -q "$installed/SKILL.md" SKILL.md && diff -rq "$installed/references" 
 
 Review the fixture table above and record, for each row, the selected route,
 evidence requested or produced, and whether the final answer overclaimed.
+Update the Status line's Last updated date as part of each release.
 
 ## Open Questions
 

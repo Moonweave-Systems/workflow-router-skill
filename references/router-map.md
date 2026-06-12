@@ -1,7 +1,6 @@
 # Workflow Router Map
 
-Use this map after reading `SKILL.md` when the request is broad, ambiguous, or
-could trigger more than one workflow.
+Use this map after reading `SKILL.md` to classify any routed request.
 
 ## Canonical Routes
 
@@ -10,7 +9,10 @@ primary route, then add secondary context such as "with GitHub context" only
 after the primary route is selected. Review or audit prompts about a PR route
 to Review with GitHub context; the GitHub route covers PR metadata, comments,
 checks, and summaries. Pure questions and trivial one-step tasks bypass routing
-entirely ("No route").
+entirely ("No route"). A multi-stage request traverses routes in sequence:
+classify the primary route for the current stage and reclassify at stage
+boundaries, as in the GitHub-to-Debugging handoff. Reroute only at a real stage
+boundary, never to reset the repair cap.
 
 | Route | Triggers | Evidence |
 | --- | --- | --- |
