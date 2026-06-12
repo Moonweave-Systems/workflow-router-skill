@@ -1,5 +1,5 @@
 interface:
   display_name: "Workflow Router"
-  short_description: "Route tasks into the right agent workflow"
+  short_description: "Route tasks into the right workflow with bounded loops and verification"
   brand_color: "#0F766E"
   default_prompt: "Use $workflow-router to choose and run the right workflow for this task."
