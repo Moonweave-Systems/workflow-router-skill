@@ -1,0 +1,93 @@
+---
+name: workflow-router
+description: Route ambiguous or multi-step agent work into the right workflow before execution. Use when the user asks Codex to choose how to proceed, design or run workflows, coordinate specialized agents, handle broad repo/system tasks, or continue through implementation, review, debugging, GitHub, research, or verification without stopping at a proposal.
+---
+
+# Workflow Router
+
+Use this skill as a thin control layer. Classify the request, pick the smallest
+workflow that can finish it, call specialized skills or roles only when useful,
+and close with concrete verification evidence.
+
+Do not turn this into a general autonomous loop engine. Keep the loop bounded,
+reversible, and tied to the user's current goal.
+
+## Start Here
+
+1. Restate the operational goal in one sentence for yourself.
+2. Inspect local context before deciding if the request depends on repo,
+   machine, GitHub, or installed skill state.
+3. Classify the task using `references/router-map.md`.
+4. Load any triggered specialized skill before acting.
+5. Execute the chosen workflow end to end when the action is reversible and
+   within scope.
+6. Verify with the smallest meaningful command, UI check, artifact metric, or
+   source citation that proves the requested behavior.
+
+If the user asks only for options, market research, or a strategy, stop after
+the decision and do not create files or run write actions.
+
+## Routing Rules
+
+Prefer a single specialized path over several overlapping ones.
+
+- Implementation: read relevant files, make a minimal diff, run focused tests,
+  then summarize changed files and verification.
+- Bug or regression: reproduce first, minimize the failing surface, instrument
+  only as needed, fix, then add or run a regression check.
+- Review: findings first, ordered by severity, with file and line references.
+  Summaries are secondary.
+- GitHub or PR: resolve repo and branch state, inspect PR/issue/CI context,
+  then use GitHub-specific workflows or `gh` for gaps.
+- Research or docs: prefer official/current sources and cite URLs. For local
+  repo decisions, local architecture beats generic web guidance.
+- System or machine triage: sample live state before explaining causes. Do not
+  rely on stale summaries for process, storage, config, or runtime claims.
+- Artifact work: prove the artifact changed in the consumer-visible layer,
+  such as rendered pixels, DOCX XML/text, slide render, or spreadsheet cells.
+
+## Loop Discipline
+
+Use bounded repair loops:
+
+- Retry the current approach at most twice when the failure is clearly
+  transient or mechanical.
+- If the same error appears three times, change strategy instead of repeating.
+- Stop after five total repair attempts in one workflow unless a new signal
+  materially narrows the problem.
+- Preserve the strongest evidence gathered before reporting a blocker.
+
+Each loop must improve at least one of: reproduction fidelity, fault
+localization, patch quality, or verification strength. A loop that only reruns
+the same command is not progress.
+
+## Risk Gate
+
+Proceed autonomously with reversible local reads, new files, small edits, local
+tests, local commits when requested, and normal pushes when the user requested
+publishing.
+
+Pause for explicit confirmation before destructive or externally visible work:
+
+- force push, hard reset, clean, branch deletion, or history rewrite
+- deleting files or directories
+- package installs or dependency changes
+- database migrations
+- production deploys
+- payments, subscriptions, secret access, or external messages
+
+Never fabricate data to satisfy validation. If evidence is missing, say what is
+missing and what was verified instead.
+
+## Completion Gate
+
+Before claiming completion:
+
+1. Run the smallest meaningful verification step available.
+2. Confirm the output directly, not from memory.
+3. Separate passing evidence from blocked or skipped checks.
+4. Give the user the result, changed paths, and any remaining risk.
+
+For frontend or visual work, include browser or screenshot verification when a
+local target exists. For command-line or workflow work, include the actual
+command behavior. For research, cite the sources used.
