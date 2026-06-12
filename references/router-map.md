@@ -7,7 +7,10 @@ could trigger more than one workflow.
 
 Keep these route names synchronized with `docs/spec.md`. Use exactly one as the
 primary route, then add secondary context such as "with GitHub context" only
-after the primary route is selected.
+after the primary route is selected. Review or audit prompts about a PR route
+to Review with GitHub context; the GitHub route covers PR metadata, comments,
+checks, and summaries. Pure questions and trivial one-step tasks bypass routing
+entirely ("No route").
 
 | Route | Triggers | Evidence |
 | --- | --- | --- |

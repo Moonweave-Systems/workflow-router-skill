@@ -93,9 +93,11 @@ when blocked.
 
 ## Routing Contract
 
-The router must map each request to one primary route.
-The route names below are canonical and must match
-`references/router-map.md`.
+The router must map each request it routes to one primary route. Pure questions
+and trivial one-step tasks bypass routing and get a direct answer; fixtures
+record this outcome as "No route". The route names below are canonical and must
+match `references/router-map.md`. Trigger examples here are illustrative; the
+authoritative trigger list lives in `references/router-map.md`.
 
 | Route | Trigger examples | Required evidence |
 | --- | --- | --- |
@@ -163,8 +165,8 @@ The router should enforce these stop rules:
 - Retry the same approach at most two additional times for mechanical or
   transient failures.
 - After the same error appears across three attempts, change strategy.
-- Stop after five total repair attempts in one workflow unless a new signal
-  materially narrows the issue.
+- Stop after five total repair attempts in one workflow. A new signal
+  justifies a strategy switch inside the cap, never extending it.
 - Do not convert a blocked verification step into a success claim.
 
 Each iteration must improve one of:
@@ -261,15 +263,21 @@ uv run python "$HOME/.codex/skills/.system/skill-creator/scripts/quick_validate.
 ```
 
 ```bash
-git diff --check
+git diff --check "$(git hash-object -t tree /dev/null)" HEAD
 ```
 
 ```bash
-! git ls-files -z | xargs -0 rg -n --pcre2 "(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"]{8,}|-----BEGIN (RSA|OPENSSH) PRIVATE KEY-----" --glob '!LICENSE'
+git ls-files -z ':(exclude)LICENSE' | xargs -0 rg -n --pcre2 "(?i)(api[_-]?key|secret|token|password)\s*[:=]\s*['\"][^'\"]{8,}|-----BEGIN (RSA|OPENSSH) PRIVATE KEY-----"; test $? -eq 1
 ```
 
 ```bash
-installed="$HOME/.codex/skills/workflow-router"; test -e "$installed" && test "$(cd "$installed" && pwd -P)" = "$(pwd -P)"
+test "$(wc -w < SKILL.md)" -le 800
+```
+
+```bash
+installed="$HOME/.codex/skills/workflow-router"
+if [ "$(cd "$installed" && pwd -P)" = "$(pwd -P)" ]; then echo "symlink install verified"
+else diff -q "$installed/SKILL.md" SKILL.md && diff -rq "$installed/references" references && echo "copy install verified"; fi
 ```
 
 Review the fixture table above and record, for each row, the selected route,

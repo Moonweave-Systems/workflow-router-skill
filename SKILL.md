@@ -1,6 +1,6 @@
 ---
 name: workflow-router
-description: Use when a request is broad, ambiguous, or spans multiple workflows (implementation, debugging, review, GitHub, research, system triage, artifacts) and the right workflow must be chosen before execution.
+description: Use when a request is broad, ambiguous, or multi-step and the right workflow (implementation, debugging, review, GitHub, research, workflow design, system triage, artifacts) must be chosen before execution.
 ---
 
 # Workflow Router
@@ -15,7 +15,7 @@ reversible, and tied to the user's current goal.
 ## Activation Contract
 
 This skill activates when the user names `$workflow-router`, asks for workflow
-routing, or the description matches broad, ambiguous, or multi-workflow work. It
+routing, or the description matches broad, ambiguous, or multi-step work. It
 does not run as a background policy, daemon, or global override.
 
 Once active, use `SKILL.md` plus `references/router-map.md` as the runtime
@@ -44,20 +44,20 @@ If two routes seem plausible, choose the route that provides the earliest verifi
 
 - Implementation: read relevant files, make a minimal diff, run focused tests,
   then summarize changed files and verification.
-- Bug or regression: reproduce first, minimize the failing surface, instrument
+- Debugging: reproduce first, minimize the failing surface, instrument
   only as needed, fix, then add or run a regression check.
 - Review: findings first, ordered by severity, with file and line references.
   Summaries are secondary.
-- GitHub or PR: resolve repo and branch state, inspect PR/issue/CI context,
+- GitHub: resolve repo and branch state, inspect PR/issue/CI context,
   then use GitHub-specific workflows or `gh` for gaps.
-- Research or docs: prefer official/current sources and cite URLs. For local
+- Research: prefer official/current sources and cite URLs. For local
   repo decisions, local architecture beats generic web guidance.
 - Workflow design: decide whether the right artifact is a skill, plugin, MCP,
   script, repo doc, issue plan, or direct implementation path, then validate the
   decision with a real prompt, command, or documented evaluation path.
-- System or machine triage: sample live state before explaining causes. Do not
+- System triage: sample live state before explaining causes. Do not
   rely on stale summaries for process, storage, config, or runtime claims.
-- Artifact work: prove the artifact changed in the consumer-visible layer,
+- Artifact: prove the artifact changed in the consumer-visible layer,
   such as rendered pixels, DOCX XML/text, slide render, or spreadsheet cells.
 
 ## Loop Discipline
@@ -71,8 +71,8 @@ Use bounded repair loops:
   clearly transient or mechanical.
 - If the same error appears across three attempts, change strategy instead of
   repeating.
-- Stop after five total repair attempts in one workflow unless a new signal
-  materially narrows the problem.
+- Stop after five total repair attempts in one workflow. A new signal
+  justifies a strategy switch inside the cap, never extending it.
 - Preserve the strongest evidence gathered before reporting a blocker.
 
 Each loop must improve at least one of: reproduction fidelity, fault

@@ -3,9 +3,9 @@
 Agent skill for routing broad or ambiguous agent work into a concrete workflow.
 
 This is a thin control layer, not a background autopilot. It helps Codex choose
-between implementation, debugging, review, GitHub, research, system triage, and
-artifact workflows, then requires bounded retries and real verification before
-claiming completion.
+between implementation, debugging, review, GitHub, research, workflow design,
+system triage, and artifact workflows, then requires bounded retries and real
+verification before claiming completion.
 
 ## What It Is For
 
